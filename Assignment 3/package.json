@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "chromedriver": "^138.0.3",
+    "dotenv": "^17.2.0",
+    "nightwatch": "^3.12.2"
+  },
+  "devDependencies": {
+    "@cucumber/cucumber": "^8.7.0"
+  }
+}
