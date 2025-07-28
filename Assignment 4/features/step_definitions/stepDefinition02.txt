@@ -1,0 +1,109 @@
+const { Given, Then } = require('@cucumber/cucumber');
+
+Given('I open Flipkart homepage', async function () {
+  await this.browser.url('https://www.flipkart.com').waitForElementVisible('body', 2000);
+});
+
+Then('I search for {string}', async function (product) {
+  await this.browser.pause(1000);
+  await this.browser.element('input[name="q"]').setValue(product);
+  await this.browser.element('button[type="submit"]').click();
+  // await this.browser.pause(2000);
+});
+
+Then('I wait for results to load', async function () {
+  await this.browser.pause(1000);
+  console.log('Results loaded');
+});
+
+Then('I verify the search results are displayed', async function () {
+  const browser = this.browser;
+  browser.pause(1000);
+  browser.useXpath();
+  browser.elements('xpath', '//*[@id="container"]/div/div[3]/div/div/img', results => {
+    if (results.value && results.value.length > 0) {
+      console.log('No records found.');
+      throw new Error('No search results found');
+    } else {
+      console.log('Results found.');
+    }
+  });
+  browser.useCss();
+});
+
+Then('I verify the page title contains {string}', async function (product) {
+  const title = await this.browser.getTitle();
+  if (!title.toLowerCase().includes(product.toLowerCase())) {
+    throw new Error(`Page title "${title}" does not include "${product}"`);
+  }
+});
+
+Then('I apply max price filter of {int}', async function (maxPrice) {
+  await this.browser.click('xpath', '//*[@id="container"]/div/div[3]/div[1]/div[1]/div/div[1]/div/section[2]/div[4]/div[3]/select');
+  // await this.browser.click('xpath', '//*[@id="container"]/div/div[3]/div[1]/div[1]/div/div[1]/div/section[2]/div[4]/div[3]/select/option[3]');
+  this.browser.pause(2000);
+  
+
+  // this.browser
+  // .click('select.my-dropdown')
+  // .click('select.my-dropdown option[value="desired_value"]');
+
+  // this.browser.click('.Gn+jFg > div:nth-child(2)') // Click the <select> element to open the dropdown
+  //     .pause(500) // Small pause to allow dropdown to open (adjust as needed)
+  //     .click(`select.Gn\\+jFg > div:nth-child(2) option[value="${maxPrice}"]`) // Click the option with the specific value
+  //     // .click(`.#container > div > div.nt6sNV.JxFEK3._48O0EI > div > div.DOjaWF.gdgoEp.col-2-12 > div > div:nth-child(1) > div > section.FR\+9\+z._2OLUF3 > div.BXgIa- > div.tKgS7w', option[value="${maxPrice}"]`) // Click the option with the specific value
+  //     .pause(1000); // Wait for the filter to apply
+  // await this.browser.perform(async function () {
+  //   const result = await this.browser.execute(function () {
+  //     // Get the second <select> element with the class
+  //     const selects = this.browser.querySelectorAll('select.Gn\\+jFg');
+  //     if (selects.length > 1) {
+  //       selects[1].value = arguments[0];
+  //       selects[1].dispatchEvent(new Event('change'));
+  //     }
+  //   }, [maxPrice]);
+
+  //   if (!result) {
+  //     throw new Error('Failed to select the second dropdown option');
+  //   }
+  // });
+  await browser.waitForElementVisible('select.Gn\\+jFg', 2000);
+
+  // Use execute to set value and trigger 'change' event on second <select>
+  await browser.execute(function (val) {
+    const selects = document.querySelectorAll('select.Gn\\+jFg');
+    if (selects.length >= 2) {
+      const secondSelect = selects[1];
+      secondSelect.value = val;
+      secondSelect.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+  }, [maxPrice]);
+  console.log(`Applied max price filter of ₹${maxPrice}`);
+});
+
+Then('I sort by price high to low', async function () {
+  this.browser.element.findByText('Price -- High to Low').click();
+  this.browser.pause(2000);
+  console.log('Sorted by price high to low');
+});
+
+Then('I verify the price of first listed product is below 20000', async function () {
+  browser.pause(2000);
+  console.log('Clicked on first product');
+  const text = await this.browser.waitForElementVisible('.CGtC98', 1000).getText('.Nx9bqj', function(result){
+    console.log(result.value);
+    const numericPrice = parseInt(result.value.replace(/[^0-9]/g, ''), 10);
+    if (isNaN(numericPrice)) {
+      throw new Error('Could not parse the price from the first result');
+    }
+    else if (numericPrice > 20000) {
+      throw new Error(`First product price ₹${numericPrice} is above ₹20000`);
+    }
+    else {
+      console.log(`First product price ₹${text} is below ₹20000`);
+      return result.value;
+    }
+  });
+
+  
+});

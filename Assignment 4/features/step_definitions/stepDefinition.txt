@@ -1,0 +1,135 @@
+const { Given, Then } = require('@cucumber/cucumber');
+
+Given('I open Flipkart homepage', async function () {
+  await this.browser.url('https://www.flipkart.com').waitForElementVisible('body', 2000);
+
+  // Close login modal if present
+//   const loginCloseButton = 'button._2KpZ6l._2doB4z';
+//   const popupVisible = await this.browser.isVisible(loginCloseButton);
+
+//   if (popupVisible) {
+//     await this.browser.click(loginCloseButton);
+//   }
+});
+
+Then('I search for {string}', async function (product) {
+//   await this.browser
+//     .waitForElementVisible('input[name="q"]', 5000)
+//     .setValue('input[name="q"]', product)
+//     .keys(this.browser.Keys.ENTER);
+
+    await this.browser.pause(1000);
+  await this.browser.element('input[name="q"]').setValue(product);
+  await this.browser.element('button[type="submit"]').click();
+  await this.browser.pause(2000);
+});
+
+Then('I wait for results to load', async function () {
+//   await this.browser
+//     .waitForElementVisible('div._1YokD2._3Mn1Gg', 10000);
+    await this.browser.pause(1000); // Wait for results to load
+    console.log('Results loaded');
+});
+
+Then('I verify the search results are displayed', async function () {
+//   const resultSelector = 'div._1fQZEK'; // actual product card
+
+//   // wait for up to 10s for any results to appear
+//   await this.browser.waitForElementVisible(resultSelector, 10000);
+
+//   const results = await this.browser.elements('css selector', resultSelector);
+
+//   if (!results.value || results.value.length === 0) {
+//     throw new Error('No search results found');
+//   }
+//   console.log(`✅ Found ${results.value.length} search results`);
+    const browser = this.browser;
+    browser.pause(2000);
+    browser.useXpath();
+    browser.elements('xpath', '//*[@id="container"]/div/div[3]/div/div/img', results => {
+      if (results.value && results.value.length > 0) {
+        console.log('No records found.');
+        throw new Error('No search results found');
+      } else {
+        console.log('Results found.');
+      }
+    });
+    browser.useCss();
+});
+
+
+Then('I verify the page title contains {string}', async function (product) {
+  const title = await this.browser.getTitle();
+  if (!title.toLowerCase().includes(product.toLowerCase())) {
+    throw new Error(`Page title "${title}" does not include "${product}"`);
+  }
+});
+
+Then('I apply max price filter of {int}', async function (maxPrice) {
+  await this.browser.click('xpath', '//*[@id="container"]/div/div[3]/div[1]/div[1]/div/div[1]/div/section[2]/div[4]/div[3]/select');
+  await this.browser.click('xpath', '//*[@id="container"]/div/div[3]/div[1]/div[1]/div/div[1]/div/section[2]/div[4]/div[3]/select/option[3]');
+  this.browser.pause(2000);
+  console.log(`Applied max price filter of ₹${maxPrice}`);
+});
+
+Then('I sort by price high to low', async function () {
+//   const sortOptionSelector = 'div._10UF8M'; // Generic selector for sort options
+//   await this.browser
+//     .waitForElementVisible(sortOptionSelector, 5000)
+//     .click('div._10UF8M:nth-child(3)'); // Assumes 3rd child is "Price -- High to Low"
+    this.browser.element.findByText('Price -- High to Low').click();
+  this.browser.pause(2000);
+  console.log('Sorted by price high to low');
+});
+
+Then('I verify the price of first listed product is below 20000', async function () {
+//   const priceSelector = 'div._30jeq3'; // Price text
+//   await this.browser.waitForElementVisible(priceSelector, 5000);
+//   const priceText = await this.browser.getText(priceSelector);
+//   const numericPrice = parseInt(priceText.replace(/[^0-9]/g, ''), 10);
+
+//   if (isNaN(numericPrice)) {
+//     throw new Error('Could not parse the price from the first result');
+//   }
+
+//   if (numericPrice > 20000) {
+//     throw new Error(`First product price ₹${numericPrice} is above ₹20000`);
+//   }
+    browser.pause(1000);
+    // await this.browser.click('css selector', 'div.Nx9bqj');
+    // await this.browser.pause(2000);
+
+    console.log('Clicked on first product');
+    // await this.browser.element('css selector', 'div.Nx9bqj', result => {
+    //        console.log(result);
+           
+    //        if(result.value) {
+    //            const priceText = result.value[0].getText();
+    //            const numericPrice = parseInt(priceText.replace(/[^0-9]/g, ''), 10);
+
+    //            if (isNaN(vdvs)) {
+    //                throw new Error('Could not parse the price from the first result');
+    //            }
+
+    //            if (numericPrice > 20000) {
+    //                throw new Error(`First product price ₹${numericPrice} is above ₹20000`);
+    //            }
+
+    //             console.log(`First product price ₹${numericPrice} is below ₹20000`);
+    //        }
+    // });
+    const text = await this.browser.waitForElementVisible('.CGtC98', 1000).getText('.Nx9bqj', function(result){
+      console.log(result.value);
+      const numericPrice = parseInt(result.value.replace(/[^0-9]/g, ''), 10);
+      if (isNaN(numericPrice)) {
+        throw new Error('Could not parse the price from the first result');
+      }
+      if (numericPrice > 20000) {
+        throw new Error(`First product price ₹${numericPrice} is above ₹20000`);
+      }
+      return result.value;
+    });
+    
+    console.log(`First product price ₹${numericPrice} is below ₹20000`);
+
+});
