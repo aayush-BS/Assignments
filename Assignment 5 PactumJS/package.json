@@ -1,0 +1,12 @@
+{
+  "name": "api-test-project",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "jest"
+  },
+  "devDependencies": {
+    "jest": "^29.0.0",
+    "pactum": "^3.2.0",
+    "pactum-matchers": "^1.0.0"
+  }
+}
